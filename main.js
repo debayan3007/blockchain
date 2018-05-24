@@ -1,12 +1,21 @@
-const {SHA256} = require('crypto-js')
-// const { collectionFetcher } = require('./lib')
+const { SHA256 } = require('crypto-js')
+const fs = require('fs')
+
 const {
   getAllTrns,
   emptyAllTrns,
   addTrns,
 } = require('./lib')
 
-// const getFailedCollection = collectionFetcher('transactions')
+const loadAllFileNames = () => {
+  const testFolder = './blocks/'
+  const files = []
+  return new Promise((resolve, reject) => {
+    fs.readdir(testFolder, (err, files) => {
+      resolve(files)
+    })
+  })
+}
 
 class Transaction {
   constructor(fromAddress, media) {
@@ -24,12 +33,12 @@ class Block {
     this.nonce = 0
   }
 
-  calculateHash () {
+  calculateHash() {
     return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString()
   }
 
   mineBlock(difficulty = 2) {
-    while (this.hash.substring(0, difficulty) !==  Array(difficulty + 1).join(0)) {
+    while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join(0)) {
       this.nonce++
       this.hash = this.calculateHash()
     }
@@ -40,12 +49,23 @@ class Block {
 
 class Blockchain {
   constructor() {
-    this.chain = [this.createGenesisBlock()]
     this.difficulty = 2
+    this.chain = []
     // get all from db
     // getAllTrns().then((transactions) => {
     //   this.pendingTransactions = transactions
     // })
+  }
+
+  async loadBlockChain() {
+    const files = await loadAllFileNames()
+    if (files.length === 0) {
+      this.chain.push(this.createGenesisBlock())
+    }
+    for (let file of files) {
+      let block = require(`./blocks/${file}`)
+      this.chain.push(block)
+    }
   }
 
   createGenesisBlock() {
@@ -56,12 +76,23 @@ class Blockchain {
     return this.chain[this.chain.length - 1]
   }
 
+  async lockBlock(block) {
+    console.log('\n\n\n\nlocking up')
+    console.log(JSON.stringify(block))
+    return new Promise((resolve, reject) => {
+      fs.writeFile(`./blocks/${block.timestamp}.json`, JSON.stringify(block, null, 2), 'utf8', () => {
+        resolve()
+      })
+      resolve()
+    })
+  }
+
   async minePendingTransactions(miningRewardAdrress) { // it will actually save the file to the hard drive and dropbox cloud storage
     // reading all from db
     this.pendingTransactions = await getAllTrns()
     let block = new Block(Date.now(), this.pendingTransactions, this.getLatestBlock().hash)
     block.mineBlock(this.difficulty)
-
+    this.lockBlock(block).catch(console.log)
     this.chain.push(block)
 
     // emptying of collection
@@ -69,7 +100,7 @@ class Blockchain {
     await emptyAllTrns()
   }
 
-  async createTransaction (transaction) {
+  async createTransaction(transaction) {
     // writing to collection
     this.pendingTransactions = await addTrns(transaction)
   }
@@ -92,27 +123,29 @@ class Blockchain {
   }
 }
 
-async function activate () {
+async function activate() {
   let markitmine = new Blockchain()
+  await markitmine.loadBlockChain()
   await markitmine.createTransaction(new Transaction('debayan', '123qe123qwe')) // photo submit
   await markitmine.createTransaction(new Transaction('pratyush', '4563456123qe123qwe'))
-  
-  
+
   console.log('not mined')
   console.log(JSON.stringify(markitmine, null, 2))
   console.log('\n.\n.\n.\n.\n.\n.\n.')
   console.log('mining...')
+
   await markitmine.minePendingTransactions()
   await markitmine.createTransaction(new Transaction('jiten', '123123123'))
-  
+
   console.log('Blockchain')
   console.log(JSON.stringify(markitmine, null, 2))
   console.log('\n.\n.\n.\n.\n.\n.\n.')
-  
+
   await markitmine.minePendingTransactions()
   await markitmine.createTransaction(new Transaction('apoorva', '4563456456'))
   console.log('new block chain')
   console.log(JSON.stringify(markitmine, null, 2))
+  await markitmine.minePendingTransactions()
 }
 
 activate()
