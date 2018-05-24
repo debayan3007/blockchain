@@ -147,6 +147,9 @@ async function activate() {
   console.log('new block chain')
   console.log(JSON.stringify(markitmine, null, 2))
   await markitmine.minePendingTransactions()
+  await markitmine.createTransaction(new Transaction('maria', '4563456456'))  
 }
 
 activate()
+
+module.exports = Blockchain
