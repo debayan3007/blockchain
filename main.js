@@ -150,6 +150,6 @@ async function activate() {
   await markitmine.createTransaction(new Transaction('maria', '4563456456'))  
 }
 
-activate()
+// activate()
 
 module.exports = Blockchain

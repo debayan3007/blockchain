@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "crypto-js": "^3.1.9-1",
-    "mongodb": "^2.2.30"
+    "express": "^4.16.3",
+    "mongodb": "^2.2.30",
+    "request": "^2.87.0"
   }
 }
