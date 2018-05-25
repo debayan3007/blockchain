@@ -1,8 +1,44 @@
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
 const {
   getAllTrns,
   getEntireBlockChain,
+  getUserTransactions,
+  addTransaction,
 } = require('../lib')
 
-getAllTrns().then(console.log).catch(console.log)
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({
+  extended: false,
+}))
 
-getEntireBlockChain().then(console.log).catch(console.log)
+app.get('/pendingtransactions', (req, res) => {
+    getAllTrns().then(trns=>{
+        res.send(trns)
+    })
+  })
+
+  app.get('/entireblockChain', (req, res) => {
+    getEntireBlockChain().then(trns=>{
+        res.send(trns)
+    })
+  })
+
+  app.get('/usertransactions', (req, res) => {
+      let userid = req.query.userid
+    getUserTransactions(userid).then(trns=>{
+        res.send(trns)
+    })
+  })
+
+  app.post('/addtransaction', (req, res) => {
+   let trns = { name: req.body.name, media: req.body.media }
+    addTransaction(trns).then(trns=>{
+      res.send(trns)
+  })
+})
+
+  app.listen(3001, () => {
+    console.log('Example app listening on port 3000!')
+  })

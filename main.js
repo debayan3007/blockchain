@@ -12,6 +12,9 @@ const loadAllFileNames = () => {
   const files = []
   return new Promise((resolve, reject) => {
     fs.readdir(testFolder, (err, files) => {
+      if (!files) {
+        files = []
+      }
       files.sort()
       resolve(files)
     })
