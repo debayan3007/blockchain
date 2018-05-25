@@ -4,8 +4,11 @@ const fs = require('fs')
 const {
   getAllTrns,
   emptyAllTrns,
-  addTrns,
 } = require('./lib')
+
+const {
+  addTrns: addTransaction,
+} = require('./lib/transaction-dal')
 
 const loadAllFileNames = () => {
   const testFolder = './blocks/'
@@ -106,7 +109,7 @@ class Blockchain {
 
   async createTransaction(transaction) {
     // writing to collection
-    this.pendingTransactions = await addTrns(transaction)
+    this.pendingTransactions = await addTransaction(transaction)
   }
 
   isChainValid() {
@@ -155,4 +158,7 @@ async function activate() {
 
 // activate()
 
-module.exports = Blockchain
+module.exports = {
+  Blockchain,
+  Transaction,
+}

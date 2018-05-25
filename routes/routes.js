@@ -33,12 +33,12 @@ app.get('/pendingtransactions', (req, res) => {
   })
 
   app.post('/addtransaction', (req, res) => {
-   let trns = { name: req.body.name, media: req.body.media }
+    let trns = { name: req.body.name, media: req.body.media }
     addTransaction(trns).then(trns=>{
       res.send(trns)
   })
 })
 
   app.listen(3001, () => {
-    console.log('Example app listening on port 3000!')
+    console.log('app listening on port 3001!')
   })
